@@ -1,0 +1,186 @@
+/* Custom Styles for ARISAN RUMAH BOLON */
+
+/* 1. Ornamen Geometris Gorga Batak pada Strip Atas */
+.gorga-border-strip {
+  height: 7px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    45deg,
+    #800000 0px,
+    #800000 14px,
+    #e6a817 14px,
+    #e6a817 20px,
+    #0a0d14 20px,
+    #0a0d14 34px,
+    #ffffff 34px,
+    #ffffff 40px
+  );
+  box-shadow: 0 2px 10px rgba(230, 168, 23, 0.4);
+}
+
+/* 2. Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0d14;
+}
+::-webkit-scrollbar-thumb {
+  background: #243048;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e6a817;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 3. Tab Buttons */
+.tab-btn {
+  color: #94a3b8;
+  background-color: transparent;
+  border: 1px solid transparent;
+}
+.tab-btn:hover {
+  color: #f1f5f9;
+  background-color: #182030;
+}
+.tab-btn.active {
+  color: #fed766;
+  background-color: #182030;
+  border-color: rgba(230, 168, 23, 0.4);
+  box-shadow: 0 0 12px rgba(230, 168, 23, 0.15);
+}
+
+/* 4. Wheel Canvas & Pointer */
+.wheel-pointer {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.9));
+  transition: transform 0.15s ease-out;
+}
+.wheel-pointer.jiggle {
+  animation: jigglePointer 0.15s ease-in-out;
+}
+
+@keyframes jigglePointer {
+  0% { transform: translateX(-50%) rotate(0deg); }
+  50% { transform: translateX(-50%) rotate(-18deg); }
+  100% { transform: translateX(-50%) rotate(0deg); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
+}
+
+@keyframes scaleUp {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-scale-up {
+  animation: scaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 4b. Animasi Menggelegar & Efek Perayaan Spektakuler */
+@keyframes screenShake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-10px, -8px) rotate(-1.5deg); }
+  20% { transform: translate(10px, 8px) rotate(1.5deg); }
+  30% { transform: translate(-8px, 6px) rotate(-1deg); }
+  40% { transform: translate(8px, -6px) rotate(1deg); }
+  50% { transform: translate(-5px, -4px) rotate(-0.5deg); }
+  60% { transform: translate(5px, 4px) rotate(0.5deg); }
+  70% { transform: translate(-3px, 2px) rotate(0deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.shake-screen {
+  animation: screenShake 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes goldShinePulse {
+  0%, 100% {
+    text-shadow: 0 0 25px rgba(254, 215, 102, 0.8), 0 0 50px rgba(230, 168, 23, 0.6), 0 0 80px rgba(230, 168, 23, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    text-shadow: 0 0 40px rgba(254, 215, 102, 1), 0 0 80px rgba(230, 168, 23, 0.9), 0 0 110px rgba(255, 255, 255, 0.7);
+    transform: scale(1.03);
+  }
+}
+.animate-gold-shine {
+  animation: goldShinePulse 1.6s infinite ease-in-out;
+}
+
+@keyframes recBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.92); }
+}
+.animate-rec-blink {
+  animation: recBlink 1s infinite ease-in-out;
+}
+
+
+/* 5. Winner Slot Card Effects */
+.winner-slot-card.won {
+  background: linear-gradient(135deg, rgba(128, 0, 0, 0.25) 0%, rgba(18, 23, 34, 0.95) 100%);
+  border-color: rgba(230, 168, 23, 0.6);
+  box-shadow: 0 0 20px rgba(230, 168, 23, 0.2);
+}
+.winner-slot-card.won .slot-badge {
+  background: linear-gradient(135deg, #800000, #9e1212);
+  color: #fed766;
+  border-color: #e6a817;
+  box-shadow: 0 2px 8px rgba(158, 18, 18, 0.5);
+}
+
+/* 6. Printable Receipt Styles */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Sembunyikan semua elemen kecuali modal kwitansi */
+  header, nav, main, footer, .gorga-border-strip, .no-print, #modal-winner-celebration, #modal-edit-participant {
+    display: none !important;
+  }
+
+  #modal-receipt {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+  }
+
+  #modal-receipt > div {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: 2px solid #000 !important;
+    padding: 24px !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Animasi Fade In Portal */
+@keyframes portalFadeIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-fade-in {
+  animation: portalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

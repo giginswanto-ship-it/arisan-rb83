@@ -1,0 +1,313 @@
+{
+  "meta": {
+    "dbName": "ARISAN_RUMAH_BOLON_DATABASE",
+    "version": "3.0",
+    "createdAt": "2026-09-12T15:38:32.696Z",
+    "updatedAt": "2026-09-12T15:38:32.696Z"
+  },
+  "state": {
+    "currentPeriod": 1,
+    "soundEnabled": true,
+    "spinDuration": 5,
+    "participants": [
+      {
+        "id": 1,
+        "name": "01. Bertha Purba",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 2,
+        "name": "02. Dologman Purba",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 3,
+        "name": "03. Herman Sipayung",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 4,
+        "name": "04. Henri Jupliaman",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 5,
+        "name": "05. Erlianna Purba",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 6,
+        "name": "06. Ida Munthe",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 7,
+        "name": "07. Ide Hormaliani 1",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 8,
+        "name": "08. Ide Hormaliani 2",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 9,
+        "name": "09. Jan Haonangan",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 10,
+        "name": "10. Jan Wenson",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 11,
+        "name": "11. Jenwarita Damanik",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 12,
+        "name": "12. Jansen / Elkianna",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 13,
+        "name": "13. Lisbeth",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 14,
+        "name": "14. Lertina",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 15,
+        "name": "15. Naikman 1 Malau",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 16,
+        "name": "16. Naikman 2 Malau",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 17,
+        "name": "17. Nellawaty",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 18,
+        "name": "18. Rohmaulina",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 19,
+        "name": "19. Romasni Saragih",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 20,
+        "name": "20. Robensius",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 21,
+        "name": "21. Robert Napitu",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 22,
+        "name": "22. Rosenta Damanik",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 23,
+        "name": "23. Rosita Saragih",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 24,
+        "name": "24. Sahat Simarmata",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 25,
+        "name": "25. Sanni Rista",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 26,
+        "name": "26. Sunim Saragih",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 27,
+        "name": "27. Sarpiani Damanik",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 28,
+        "name": "28. Swanto #1",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 29,
+        "name": "29. Swanto #2",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 30,
+        "name": "30. Timoraya",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 31,
+        "name": "31. Torando Purba",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 32,
+        "name": "32. Peserta 32",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 33,
+        "name": "33. Peserta 33",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 34,
+        "name": "34. Peserta 34",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 35,
+        "name": "35. Peserta 35",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      },
+      {
+        "id": 36,
+        "name": "36. Peserta 36",
+        "phone": "",
+        "wonPeriod": null,
+        "wonSlot": null,
+        "wonDate": null
+      }
+    ],
+    "currentMonthWinners": [],
+    "monthlyPayments": {
+      "1": {}
+    },
+    "history": [],
+    "kasLedger": []
+  },
+  "pins": {
+    "operator": "1945",
+    "bendahara": "2026"
+  }
+}
