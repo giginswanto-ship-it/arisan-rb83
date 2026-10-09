@@ -45,6 +45,9 @@
 </head>
 <body class="bg-bolon-dark text-slate-100 min-h-screen flex flex-col font-sans selection:bg-bolon-gold selection:text-black">
 
+  <!-- KILATAN LEDAKAN SPEKTAKULER FULLSCREEN -->
+  <div id="explosion-flash" class="pointer-events-none fixed inset-0 z-[100] opacity-0"></div>
+
   <!-- TOP DECORATIVE GORGA STRIP -->
   <div class="gorga-border-strip"></div>
 
@@ -1131,7 +1134,7 @@
   <!-- MODAL: SELAMAT KEPADA PEMENANG (POPUP SPEKTAKULER & FONT RAKSASA) -->
   <!-- ======================================================== -->
   <div id="modal-winner-celebration" class="modal-overlay hidden fixed inset-0 bg-black/90 backdrop-blur-lg z-50 flex items-center justify-center p-4 overflow-y-auto">
-    <div id="celeb-card-box" class="bg-gradient-to-b from-[#1a1212] via-bolon-card to-bolon-dark border-4 border-bolon-gold rounded-3xl max-w-2xl sm:max-w-3xl w-full p-6 sm:p-10 text-center shadow-[0_0_80px_rgba(230,168,23,0.35)] relative space-y-6 animate-scale-up my-auto">
+    <div id="celeb-card-box" class="bg-gradient-to-b from-[#1a1212] via-bolon-card to-bolon-dark border-4 border-bolon-gold rounded-3xl max-w-2xl sm:max-w-3xl w-full p-6 sm:p-10 text-center shadow-[0_0_80px_rgba(230,168,23,0.35)] relative space-y-6 animate-scale-up animate-celebration-pulse my-auto">
       
       <!-- Close Button di sudut kanan atas -->
       <button onclick="closeWinnerCelebration()" class="absolute top-4 right-5 text-slate-400 hover:text-white text-2xl font-bold transition" title="Tutup Popup & Selesaikan Rekaman">&times;</button>
@@ -1147,9 +1150,9 @@
 
       <div>
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-extrabold uppercase bg-gradient-to-r from-bolon-maroon via-bolon-gold to-bolon-maroon text-slate-950 tracking-widest shadow-md">
-          <i class="fa-solid fa-crown text-amber-900"></i>
-          <span>SELAMAT KEPADA PEMENANG RESMI!</span>
-          <i class="fa-solid fa-crown text-amber-900"></i>
+          <i class="fa-solid fa-champagne-glasses text-amber-900"></i>
+          <span>🎉 SELAMAT KEPADA PEMENANG RESMI! 🎉</span>
+          <i class="fa-solid fa-champagne-glasses text-amber-900"></i>
         </div>
         
         <h3 id="celeb-slot-title" class="text-xs sm:text-sm font-bold text-amber-300 uppercase tracking-widest mt-3">

@@ -810,88 +810,166 @@ function stopSuspenseDrumRoll() {
   }
 }
 
-// EFEK AUDIO MENGGELEGAR (BOM SUB-BASS + GUNTUR PETIR + GONG EMAS + FANFARE)
-function playThunderousBoom() {
+// ========================================================
+// EFEK AUDIO LEDAKAN SPEKTAKULER & FANFARE KEMENANGAN MEGAH
+// Detonation Snap + Heavy Sub-Bass Bomb + Thunder Rumble + Firecracker Crackles + Gold Gong + Fanfare
+// ========================================================
+function playThunderousExplosionSound() {
   if (!appState.soundEnabled) return;
   try {
     const ctx = getAudioContext();
     if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
     const now = ctx.currentTime;
 
-    // 1. SUB-BASS CANNON EXPLOSION (DENTUMAN BOM SUB-BASS SUPER MENGGELEGAR)
-    const subOsc = ctx.createOscillator();
-    const subGain = ctx.createGain();
-    subOsc.type = 'sine';
-    subOsc.frequency.setValueAtTime(180, now);
-    subOsc.frequency.exponentialRampToValueAtTime(28, now + 1.4);
-    subGain.gain.setValueAtTime(0.95, now);
-    subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
-    subOsc.connect(subGain);
-    connectAudioOut(subGain);
-    subOsc.start(now);
-    subOsc.stop(now + 1.8);
+    // --- 1. DETONATION TRANSIENT CRACK (SNAP LEDAKAN INSTAN / BLAST CAP) ---
+    // Dentuman tajam di milidetik ke-0 untuk efek ledakan menggelegar seketika
+    const snapOsc = ctx.createOscillator();
+    const snapGain = ctx.createGain();
+    snapOsc.type = 'sawtooth';
+    snapOsc.frequency.setValueAtTime(650, now);
+    snapOsc.frequency.exponentialRampToValueAtTime(40, now + 0.05);
+    snapGain.gain.setValueAtTime(1.0, now);
+    snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+    snapOsc.connect(snapGain);
+    connectAudioOut(snapGain);
+    snapOsc.start(now);
+    snapOsc.stop(now + 0.06);
 
-    // 2. GEMURUH PETIR / GUNTUR (THUNDER RUMBLE CRACKLE VIA FILTERED NOISE)
-    const bufferSize = Math.floor(ctx.sampleRate * 2.2);
+    // Filtered noise snap transient (suara letupan awal ledakan)
+    const snapBufferSize = Math.floor(ctx.sampleRate * 0.08);
+    const snapNoiseBuffer = ctx.createBuffer(1, snapBufferSize, ctx.sampleRate);
+    const snapOutput = snapNoiseBuffer.getChannelData(0);
+    for (let i = 0; i < snapBufferSize; i++) {
+      snapOutput[i] = (Math.random() * 2 - 1) * Math.exp(-i / (snapBufferSize * 0.25));
+    }
+    const snapNoise = ctx.createBufferSource();
+    snapNoise.buffer = snapNoiseBuffer;
+    const snapFilter = ctx.createBiquadFilter();
+    snapFilter.type = 'bandpass';
+    snapFilter.frequency.setValueAtTime(1800, now);
+    snapFilter.Q.setValueAtTime(2.0, now);
+    const snapNoiseGain = ctx.createGain();
+    snapNoiseGain.gain.setValueAtTime(0.9, now);
+    snapNoiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    snapNoise.connect(snapFilter);
+    snapFilter.connect(snapNoiseGain);
+    connectAudioOut(snapNoiseGain);
+    snapNoise.start(now);
+    snapNoise.stop(now + 0.08);
+
+    // --- 2. SUB-BASS BOMB EXPLOSION (DENTUMAN BOM SUB-BASS SUPER BERAT & BERGETAR) ---
+    // Oscillator 1: Deep Sine Bomb Sweep (240Hz -> 25Hz)
+    const subOsc1 = ctx.createOscillator();
+    const subGain1 = ctx.createGain();
+    subOsc1.type = 'sine';
+    subOsc1.frequency.setValueAtTime(240, now);
+    subOsc1.frequency.exponentialRampToValueAtTime(25, now + 1.6);
+    subGain1.gain.setValueAtTime(1.0, now);
+    subGain1.gain.exponentialRampToValueAtTime(0.001, now + 2.2);
+    subOsc1.connect(subGain1);
+    connectAudioOut(subGain1);
+    subOsc1.start(now);
+    subOsc1.stop(now + 2.2);
+
+    // Oscillator 2: Warm Triangle Punch (160Hz -> 20Hz)
+    const subOsc2 = ctx.createOscillator();
+    const subGain2 = ctx.createGain();
+    subOsc2.type = 'triangle';
+    subOsc2.frequency.setValueAtTime(160, now);
+    subOsc2.frequency.exponentialRampToValueAtTime(20, now + 1.2);
+    subGain2.gain.setValueAtTime(0.85, now);
+    subGain2.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+    subOsc2.connect(subGain2);
+    connectAudioOut(subGain2);
+    subOsc2.start(now);
+    subOsc2.stop(now + 1.8);
+
+    // --- 3. ROLLING THUNDER & DEBRIS NOISE (GEMURUH LEDAKAN GUNTUR PANJANG) ---
+    const bufferSize = Math.floor(ctx.sampleRate * 2.5);
     const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
     const output = noiseBuffer.getChannelData(0);
     for (let i = 0; i < bufferSize; i++) {
-      output[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+      output[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 0.9);
     }
     const whiteNoise = ctx.createBufferSource();
     whiteNoise.buffer = noiseBuffer;
 
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(500, now);
-    filter.frequency.exponentialRampToValueAtTime(70, now + 2.0);
+    filter.frequency.setValueAtTime(1200, now);
+    filter.frequency.exponentialRampToValueAtTime(55, now + 2.3);
 
     const noiseGain = ctx.createGain();
-    noiseGain.gain.setValueAtTime(0.75, now);
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 2.2);
+    noiseGain.gain.setValueAtTime(0.9, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
 
     whiteNoise.connect(filter);
     filter.connect(noiseGain);
     connectAudioOut(noiseGain);
     whiteNoise.start(now);
-    whiteNoise.stop(now + 2.2);
+    whiteNoise.stop(now + 2.5);
 
-    // 3. DENTANG GONG LOGAM EMAS
-    [329.63, 659.25, 1318.5].forEach(freq => {
+    // --- 4. FIRECRACKER BURSTS / PETASAN LEDAKAN BERTINGKAT ---
+    // Letupan micro kembang api setelah ledakan utama
+    const popDelays = [0.08, 0.16, 0.25, 0.38, 0.52, 0.68, 0.85];
+    popDelays.forEach((delay, idx) => {
+      const popTime = now + delay;
+      const popOsc = ctx.createOscillator();
+      const popGain = ctx.createGain();
+      popOsc.type = 'sine';
+      popOsc.frequency.setValueAtTime(320 - (idx * 20), popTime);
+      popOsc.frequency.exponentialRampToValueAtTime(50, popTime + 0.04);
+      popGain.gain.setValueAtTime(0.4 - (idx * 0.03), popTime);
+      popGain.gain.exponentialRampToValueAtTime(0.001, popTime + 0.04);
+      popOsc.connect(popGain);
+      connectAudioOut(popGain);
+      popOsc.start(popTime);
+      popOsc.stop(popTime + 0.04);
+    });
+
+    // --- 5. DENTANG GONG LOGAM EMAS NUSANTARA ---
+    [220.0, 329.63, 659.25, 1318.5].forEach(freq => {
       const gongOsc = ctx.createOscillator();
       const gongGain = ctx.createGain();
       gongOsc.type = 'sine';
-      gongOsc.frequency.setValueAtTime(freq, now + 0.05);
-      gongGain.gain.setValueAtTime(0.3, now + 0.05);
-      gongGain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+      gongOsc.frequency.setValueAtTime(freq, now + 0.06);
+      gongGain.gain.setValueAtTime(0.35, now + 0.06);
+      gongGain.gain.exponentialRampToValueAtTime(0.001, now + 2.8);
       gongOsc.connect(gongGain);
       connectAudioOut(gongGain);
-      gongOsc.start(now + 0.05);
-      gongOsc.stop(now + 2.5);
+      gongOsc.start(now + 0.06);
+      gongOsc.stop(now + 2.8);
     });
 
-    // 4. TEROMPET KEMENANGAN MEGAH (HEROIC FANFARE ARPEGGIO)
+    // --- 6. FANFARE TEROMPET KEMENANGAN MEGAH (HEROIC VICTORY FANFARE) ---
     const fanfareNotes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50];
     fanfareNotes.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      const noteTime = now + 0.25 + (idx * 0.11);
+      const noteTime = now + 0.35 + (idx * 0.11);
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, noteTime);
-      gain.gain.setValueAtTime(0.35, noteTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.8);
+      gain.gain.setValueAtTime(0.4, noteTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, noteTime + 0.85);
       osc.connect(gain);
       connectAudioOut(gain);
       osc.start(noteTime);
-      osc.stop(noteTime + 0.8);
+      osc.stop(noteTime + 0.85);
     });
   } catch (e) {
-    console.warn("Audio error:", e);
+    console.warn("Audio explosion error:", e);
   }
 }
 
+function playThunderousBoom() {
+  playThunderousExplosionSound();
+}
+
 function playWinFanfare() {
-  playThunderousBoom();
+  playThunderousExplosionSound();
 }
 
 function toggleSound() {
@@ -1516,8 +1594,9 @@ function spinNextWinner() {
         liveDisplay.innerHTML = `<span class="text-sm font-black text-amber-300 tracking-wide animate-bounce">🏆 Pemenang Terpilih: <b>${winner.name}</b></span>`;
       }
 
-      // Bunyikan dentuman kemenangan
-      playThunderousBoom();
+      // Bunyikan dentuman suara ledakan dan mulai selebrasi spektakuler SEKETIKA pemenang ditentukan!
+      playThunderousExplosionSound();
+      triggerGrandCelebration();
 
       // 2. RECORDING BERHENTI KETIKA SUDAH DIDAPATKAN PEMENANG UNDIAN ARISAN!
       // Beri jeda 850ms agar momen pendaratan roda & banner pemenang terekam sempurna di akhir video
@@ -1921,13 +2000,21 @@ function shareWinnerWhatsApp(slotIndex) {
 
 // Efek Guncangan Layar Spektakuler saat Menggelegar
 function triggerScreenShake() {
+  document.body.classList.add('shake-explosion');
   document.body.classList.add('shake-screen');
   const cardBox = document.getElementById('celeb-card-box');
-  if (cardBox) cardBox.classList.add('shake-screen');
+  if (cardBox) {
+    cardBox.classList.add('shake-explosion');
+    cardBox.classList.add('shake-screen');
+  }
   setTimeout(() => {
+    document.body.classList.remove('shake-explosion');
     document.body.classList.remove('shake-screen');
-    if (cardBox) cardBox.classList.remove('shake-screen');
-  }, 900);
+    if (cardBox) {
+      cardBox.classList.remove('shake-explosion');
+      cardBox.classList.remove('shake-screen');
+    }
+  }, 950);
 }
 
 // Popup Perayaan Pemenang (Font Raksasa + Video Player Rekaman)
@@ -2139,33 +2226,97 @@ function viewActiveWinnerReceipt() {
   openReceiptModal(slot);
 }
 
-// Confetti Bertingkat Multi-Ledakan Spektakuler
-function triggerCelebrationConfetti() {
+// ========================================================
+// SELEBRASI SPEKTAKULER BERTINGKAT (KILATAN LEDAKAN + GEMPA LAYAR + MULTI-CANNON CONFETTI)
+// ========================================================
+function triggerGrandCelebration() {
+  // 1. Kilatan Ledakan Fullscreen Flash
+  const flashElem = document.getElementById('explosion-flash');
+  if (flashElem) {
+    flashElem.classList.remove('animate-explosion-flash');
+    void flashElem.offsetWidth; // trigger reflow
+    flashElem.classList.add('animate-explosion-flash');
+    setTimeout(() => {
+      flashElem.classList.remove('animate-explosion-flash');
+    }, 800);
+  }
+
+  // 2. Guncangan Layar Spektakuler
+  triggerScreenShake();
+
+  // 3. Pesta Kembang Api & Confetti Bertingkat Multi-Ledakan Spektakuler
   if (typeof confetti === 'function') {
-    // 1. Ledakan Kiri
+    // Ledakan 1: Meriam Kiri & Kanan Seketika (t = 0)
     confetti({
-      particleCount: 90,
-      spread: 80,
-      origin: { x: 0.2, y: 0.6 },
-      colors: ['#e6a817', '#800000', '#9e1212', '#ffffff', '#22c55e']
+      particleCount: 110,
+      angle: 60,
+      spread: 75,
+      origin: { x: 0.05, y: 0.8 },
+      colors: ['#e6a817', '#800000', '#9e1212', '#fed766', '#ffffff']
     });
-    // 2. Ledakan Kanan
     confetti({
-      particleCount: 90,
-      spread: 80,
-      origin: { x: 0.8, y: 0.6 },
-      colors: ['#e6a817', '#800000', '#9e1212', '#ffffff', '#22c55e']
+      particleCount: 110,
+      angle: 120,
+      spread: 75,
+      origin: { x: 0.95, y: 0.8 },
+      colors: ['#e6a817', '#800000', '#9e1212', '#fed766', '#ffffff']
     });
-    // 3. Hujan Emas dari Tengah Atas
+
+    // Ledakan 2: Ledakan Tengah dari Roda Berputar (t = 220ms)
     setTimeout(() => {
       confetti({
-        particleCount: 70,
-        spread: 100,
-        origin: { x: 0.5, y: 0.25 },
-        colors: ['#fed766', '#e6a817', '#ffffff']
+        particleCount: 130,
+        spread: 120,
+        origin: { x: 0.5, y: 0.5 },
+        colors: ['#ffd700', '#ff4500', '#ffffff', '#e6a817', '#22c55e']
       });
-    }, 280);
+    }, 220);
+
+    // Ledakan 3: Kembang Api Udara Salvo (t = 500ms & 800ms)
+    setTimeout(() => {
+      confetti({
+        particleCount: 85,
+        spread: 90,
+        origin: { x: 0.25, y: 0.3 },
+        colors: ['#fed766', '#800000', '#e6a817']
+      });
+    }, 500);
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 85,
+        spread: 90,
+        origin: { x: 0.75, y: 0.3 },
+        colors: ['#22c55e', '#38bdf8', '#fed766']
+      });
+    }, 800);
+
+    // Ledakan 4: Hujan Bintang Emas Berkelanjutan (t = 1100ms selama 2.5 detik)
+    setTimeout(() => {
+      const duration = 2500;
+      const end = Date.now() + duration;
+      const interval = setInterval(() => {
+        if (Date.now() > end) {
+          clearInterval(interval);
+          return;
+        }
+        confetti({
+          particleCount: 16,
+          angle: 90,
+          spread: 80,
+          startVelocity: 18,
+          origin: { x: Math.random() * 0.8 + 0.1, y: 0 },
+          colors: ['#fed766', '#e6a817', '#ffffff'],
+          ticks: 200,
+          gravity: 0.8
+        });
+      }, 150);
+    }, 1100);
   }
+}
+
+function triggerCelebrationConfetti() {
+  triggerGrandCelebration();
 }
 
 // ==========================================
