@@ -64,7 +64,7 @@ const DEFAULT_PARTICIPANTS = [
   { id: 29, name: "29. Swanto #2", phone: "" },
   { id: 30, name: "30. Timoraya", phone: "" },
   { id: 31, name: "31. Torando Purba", phone: "" },
-  { id: 32, name: "32. Malem", phone: "" },
+  { id: 32, name: "32. Peserta 32", phone: "" },
   { id: 33, name: "33. Peserta 33", phone: "" },
   { id: 34, name: "34. Peserta 34", phone: "" },
   { id: 35, name: "35. Peserta 35", phone: "" },

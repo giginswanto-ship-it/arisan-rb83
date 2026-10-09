@@ -51,7 +51,7 @@ const DEFAULT_PARTICIPANTS = [
   { id: 29, name: "29. Swanto #2", phone: "" },
   { id: 30, name: "30. Timoraya", phone: "" },
   { id: 31, name: "31. Torando Purba", phone: "" },
-  { id: 32, name: "32. Malem", phone: "" },
+  { id: 32, name: "32. Peserta 32", phone: "" },
   { id: 33, name: "33. Peserta 33", phone: "" },
   { id: 34, name: "34. Peserta 34", phone: "" },
   { id: 35, name: "35. Peserta 35", phone: "" },
@@ -1107,11 +1107,6 @@ async function initApp() {
       const json = await res.json();
       if (json && json.success && json.data && json.data.state && json.data.state.participants) {
         appState = json.data.state;
-        const hasMalem = appState.participants.some(p => p.name && p.name.toLowerCase().includes('malem'));
-        if (!hasMalem) {
-          const p32 = appState.participants.find(p => p.id === 32);
-          if (p32) p32.name = "32. Malem";
-        }
         reconcileAndSyncWinnerStatus();
         if (json.data.pins) {
           try { localStorage.setItem(PINS_STORAGE_KEY, JSON.stringify(json.data.pins)); } catch(e){}
@@ -1129,11 +1124,6 @@ async function initApp() {
     const idbState = await loadStateFromIndexedDB();
     if (idbState && idbState.participants && idbState.participants.length === TOTAL_PARTICIPANTS) {
       appState = idbState;
-      const hasMalem = appState.participants.some(p => p.name && p.name.toLowerCase().includes('malem'));
-      if (!hasMalem) {
-        const p32 = appState.participants.find(p => p.id === 32);
-        if (p32) p32.name = "32. Malem";
-      }
       reconcileAndSyncWinnerStatus();
       renderAll();
     }
@@ -1164,14 +1154,7 @@ function loadState() {
   if (!appState.currentMonthWinners) appState.currentMonthWinners = [];
   if (!appState.history) appState.history = [];
   if (!appState.kasLedger) appState.kasLedger = [];
-  // Pastikan peserta Malem terdaftar di daftar peserta (slot 32)
-  const hasMalem = appState.participants.some(p => p.name && p.name.toLowerCase().includes('malem'));
-  if (!hasMalem) {
-    const p32 = appState.participants.find(p => p.id === 32);
-    if (p32) {
-      p32.name = "32. Malem";
-    }
-  }
+  if (!appState.spinDuration) appState.spinDuration = 5;
 
   // Rekonsiliasi integritas status pemenang anti-duplikasi
   reconcileAndSyncWinnerStatus();
@@ -1645,15 +1628,8 @@ function spinNextWinner() {
   startDrawRecording();
   startSuspenseDrumRoll();
 
-  // TARGET PEMENANG: Jika ada peserta "Malem" yang eligible (belum pernah menang),
-  // jadikan Malem sebagai pemenang saat roda diputar sesuai permintaan!
-  const malemIndex = eligible.findIndex(p => p.name && p.name.toLowerCase().includes('malem'));
-  let winningIndex;
-  if (malemIndex !== -1) {
-    winningIndex = malemIndex;
-  } else {
-    winningIndex = Math.floor(Math.random() * eligible.length);
-  }
+  // Pilih acak salah satu peserta eligible
+  const winningIndex = Math.floor(Math.random() * eligible.length);
   let winner = eligible[winningIndex];
 
   // Failsafe anti-duplikasi: pastikan pemenang terpilih 100% belum pernah menang
@@ -1667,7 +1643,6 @@ function spinNextWinner() {
       return;
     }
     winner = strictlyEligible[Math.floor(Math.random() * strictlyEligible.length)];
-    winningIndex = eligible.indexOf(winner);
   }
 
   const arc = (2 * Math.PI) / eligible.length;

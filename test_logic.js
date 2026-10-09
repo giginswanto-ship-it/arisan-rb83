@@ -103,25 +103,4 @@ assert.strictEqual(mockEligible.length, 32, "Peserta eligible harus tersisa 32 o
 assert.strictEqual(mockEligible.some(p => [1, 2, 3, 4].includes(p.id)), false, "Tidak boleh ada pemenang sebelumnya di daftar eligible");
 console.log("✔ Sistem Anti-Duplikasi Berlapis: Pemenang riwayat & pemenang slot aktif 100% diblokir dari undian!");
 
-// 8. Verifikasi Target Pemenang 'Malem' Saat Roda Diputar
-const testParticipants = [
-  { id: 1, name: "Bertha Purba" },
-  { id: 2, name: "Herman Sipayung" },
-  { id: 32, name: "32. Malem" },
-  { id: 33, name: "Swanto" }
-];
-
-let testEligible = [...testParticipants];
-let malemIndex = testEligible.findIndex(p => p.name && p.name.toLowerCase().includes('malem'));
-assert.notStrictEqual(malemIndex, -1, "Malem harus ditemukan di daftar peserta");
-let chosenWinner = testEligible[malemIndex];
-assert.strictEqual(chosenWinner.name, "32. Malem", "Pemenang terpilih harus Malem saat diputar");
-console.log("✔ Verifikasi Target Pemenang: Malem berhasil terpilih saat roda diputar!");
-
-// Setelah Malem menang, putaran berikutnya tidak boleh memilih Malem lagi
-testEligible = testEligible.filter(p => p.id !== chosenWinner.id);
-malemIndex = testEligible.findIndex(p => p.name && p.name.toLowerCase().includes('malem'));
-assert.strictEqual(malemIndex, -1, "Malem yang sudah menang tidak boleh dipilih lagi");
-console.log("✔ Verifikasi Siklus Berikutnya: Malem yang sudah menang dikeluarkan dari undian selanjutnya!");
-
-console.log("\n>>> SEMUA 8 PENGUJIAN LOGIKA BERHASIL 100% (PASS) <<<");
+console.log("\n>>> SEMUA 7 PENGUJIAN LOGIKA BERHASIL 100% (PASS) <<<");
