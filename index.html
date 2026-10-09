@@ -259,9 +259,14 @@
 
         <!-- User Role Session Badge & Logout -->
         <div class="flex items-center gap-2 pl-2 border-l border-bolon-border shrink-0">
-          <div id="user-role-badge" class="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+          <div id="user-role-badge" onclick="openSwitchUserModal()" class="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer hover:ring-2 hover:ring-bolon-gold/50 transition" title="Klik untuk Ganti User / Peran">
             <!-- Populated by JS -->
           </div>
+          <!-- Tombol Ganti User / Switch Role -->
+          <button id="btn-switch-user" onclick="openSwitchUserModal()" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-600/30 via-bolon-card to-amber-700/20 hover:from-amber-600/50 hover:to-amber-700/40 border border-bolon-gold/60 text-amber-300 hover:text-amber-200 transition flex items-center gap-1.5 shadow-sm" title="Ganti Pengguna / Alih Peran">
+            <i class="fa-solid fa-users-gear text-bolon-gold"></i>
+            <span>Ganti User</span>
+          </button>
           <button id="btn-change-pin" onclick="openChangePinModal()" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-bolon-card hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1.5 shadow-sm" title="Ganti PIN Keamanan">
             <i class="fa-solid fa-key text-amber-400"></i>
             <span class="hidden sm:inline">Ganti PIN</span>
@@ -432,9 +437,15 @@
               <span>Undi Sekaligus 3</span>
             </button>
           </div>
-          <div id="operator-undian-notice" class="hidden w-full p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/40 text-amber-300 text-xs flex items-center justify-center gap-2">
-            <i class="fa-solid fa-lock text-bolon-gold"></i>
-            <span>Pemutaran undian & kunci periode hanya dapat dioperasikan oleh <b>Operator</b>.</span>
+          <div id="operator-undian-notice" class="hidden w-full p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/40 text-amber-300 text-xs flex items-center justify-center gap-2 flex-wrap">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-lock text-bolon-gold"></i>
+              <span>Pemutaran undian & kunci periode hanya dapat dioperasikan oleh <b>Operator</b>.</span>
+            </div>
+            <button type="button" onclick="openSwitchUserModal('operator')" class="px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-900 text-amber-300 font-bold text-[11px] border border-red-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+              <i class="fa-solid fa-users-gear text-[10px]"></i>
+              <span>Ganti User ke Operator</span>
+            </button>
           </div>
 
           <!-- Status Peserta Sisa Mini Bar -->
@@ -657,9 +668,15 @@
                 <span>Reset Status</span>
               </button>
             </div>
-            <div id="iuran-role-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
-              <i class="fa-solid fa-lock text-bolon-gold"></i>
-              <span>Ceklist iuran hanya dapat diubah oleh <b>Bendahara</b></span>
+            <div id="iuran-role-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-lock text-bolon-gold"></i>
+                <span>Ceklist iuran hanya dapat diubah oleh <b>Bendahara</b></span>
+              </div>
+              <button type="button" onclick="openSwitchUserModal('bendahara')" class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-bold text-[11px] border border-emerald-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+                <i class="fa-solid fa-users-gear text-[10px]"></i>
+                <span>Ganti User ke Bendahara</span>
+              </button>
             </div>
           </div>
         </div>
@@ -817,9 +834,15 @@
 
         <!-- Form Tambah Catatan Kas (4 Kols) -->
         <div class="lg:col-span-4 bg-bolon-card border border-bolon-border rounded-2xl p-5 space-y-4">
-          <div id="kas-bendahara-notice" class="hidden p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs flex items-center gap-2 mb-2">
-            <i class="fa-solid fa-lock text-bolon-gold"></i>
-            <span>Hanya <b>Bendahara</b> yang berwenang mencatat mutasi kas.</span>
+          <div id="kas-bendahara-notice" class="hidden p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-lock text-bolon-gold"></i>
+              <span>Hanya <b>Bendahara</b> yang berwenang mencatat mutasi kas.</span>
+            </div>
+            <button type="button" onclick="openSwitchUserModal('bendahara')" class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-bold text-[11px] border border-emerald-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+              <i class="fa-solid fa-users-gear text-[10px]"></i>
+              <span>Ganti User ke Bendahara</span>
+            </button>
           </div>
           <h3 class="font-heading font-bold text-sm text-slate-100 flex items-center gap-2">
             <i class="fa-solid fa-pen-to-square text-bolon-gold"></i>
@@ -921,9 +944,15 @@
                 <span>Reset Siklus</span>
               </button>
             </div>
-            <div id="peserta-operator-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
-              <i class="fa-solid fa-lock text-bolon-gold"></i>
-              <span>Edit peserta & reset siklus hanya dapat dilakukan oleh <b>Operator</b></span>
+            <div id="peserta-operator-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-lock text-bolon-gold"></i>
+                <span>Edit peserta & reset siklus hanya dapat dilakukan oleh <b>Operator</b></span>
+              </div>
+              <button type="button" onclick="openSwitchUserModal('operator')" class="px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-900 text-amber-300 font-bold text-[11px] border border-red-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+                <i class="fa-solid fa-users-gear text-[10px]"></i>
+                <span>Ganti User ke Operator</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1397,6 +1426,143 @@
           <span>Inisialisasi Ulang DB Bersih (36 Peserta)</span>
         </button>
         <button type="button" onclick="closeDatabaseModal()" class="py-2 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition ml-auto">
+          Tutup
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: GANTI PENGGUNA / ALIH PERAN (SWITCH USER) -->
+  <!-- ======================================================== -->
+  <div id="modal-switch-user" class="modal-overlay hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-bolon-card border-2 border-bolon-gold/60 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 relative my-auto animate-fade-in">
+      
+      <!-- Header Modal -->
+      <div class="flex items-center justify-between border-b border-bolon-border pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-950/80 border border-bolon-gold/50 flex items-center justify-center text-bolon-gold shadow-md">
+            <i class="fa-solid fa-users-gear text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-heading font-extrabold text-white">Ganti Pengguna / Peran</h3>
+            <p class="text-xs text-amber-300">Beralih akun arisan secara instan tanpa reload</p>
+          </div>
+        </div>
+        <button onclick="closeSwitchUserModal()" class="text-slate-400 hover:text-white text-2xl font-bold transition">&times;</button>
+      </div>
+
+      <!-- Info User Aktif Saat Ini -->
+      <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Akun Aktif Saat Ini:</span>
+          <div id="switch-user-current-info" class="text-xs sm:text-sm font-bold text-white flex items-center gap-2 mt-0.5">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <button type="button" onclick="goToFullLoginPortal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-950/70 hover:bg-red-900 border border-red-700/60 text-red-200 transition flex items-center gap-1.5 shadow" title="Kembali ke Portal Halaman Depan">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i>
+          <span>Portal Depan</span>
+        </button>
+      </div>
+
+      <!-- Pesan Error Switch -->
+      <div id="switch-user-error" class="hidden text-xs text-red-300 bg-red-950/60 border border-red-800/80 p-3 rounded-xl flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+        <span id="switch-user-error-text"></span>
+      </div>
+
+      <!-- Opsi Beralih ke 3 Peran -->
+      <div class="space-y-3">
+        <span class="text-xs font-bold text-slate-300 uppercase tracking-wide block">Pilih Akun yang Ingin Dituju:</span>
+
+        <!-- 1. OPERATOR -->
+        <div id="switch-card-operator" class="p-3.5 rounded-2xl bg-gradient-to-r from-red-950/40 via-bolon-card to-bolon-card border border-red-800/40 hover:border-red-500/60 transition space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-red-950 border border-red-600/40 flex items-center justify-center text-red-400">
+                <i class="fa-solid fa-crown text-sm"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-2">
+                  <span>OPERATOR</span>
+                  <span id="switch-badge-op-active" class="hidden text-[9px] bg-red-700 text-white px-1.5 py-0.2 rounded font-extrabold uppercase">Aktif</span>
+                </div>
+                <div class="text-[10px] text-slate-400">Akses undian, kunci periode, durasi, edit peserta</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-red-300 bg-red-950/80 px-2 py-0.5 rounded border border-red-800">Perlu PIN</span>
+          </div>
+          <form onsubmit="handleQuickSwitchOperator(event)" class="flex gap-2">
+            <input type="password" id="switch-pin-operator" maxlength="10" placeholder="PIN Operator (Default: 1945)" class="flex-1 bg-slate-900 border border-slate-700 focus:border-red-500 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none tracking-widest text-center font-bold">
+            <button type="submit" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-red-700 to-bolon-maroon hover:from-red-600 hover:to-red-800 text-white font-heading font-bold text-xs transition flex items-center gap-1.5 shadow">
+              <span>Masuk</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- 2. BENDAHARA -->
+        <div id="switch-card-bendahara" class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-bolon-card to-bolon-card border border-emerald-800/40 hover:border-emerald-500/60 transition space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-950 border border-emerald-600/40 flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-vault text-sm"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-2">
+                  <span>BENDAHARA</span>
+                  <span id="switch-badge-ben-active" class="hidden text-[9px] bg-emerald-700 text-white px-1.5 py-0.2 rounded font-extrabold uppercase">Aktif</span>
+                </div>
+                <div class="text-[10px] text-slate-400">Akses checklist iuran & buku kas Rumah Bolon</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">Perlu PIN</span>
+          </div>
+          <form onsubmit="handleQuickSwitchBendahara(event)" class="flex gap-2">
+            <input type="password" id="switch-pin-bendahara" maxlength="10" placeholder="PIN Bendahara (Default: 2026)" class="flex-1 bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none tracking-widest text-center font-bold">
+            <button type="submit" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-heading font-bold text-xs transition flex items-center gap-1.5 shadow">
+              <span>Masuk</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- 3. PESERTA -->
+        <div id="switch-card-peserta" class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/30 via-bolon-card to-bolon-card border border-amber-800/40 hover:border-amber-500/60 transition space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-950 border border-amber-600/40 flex items-center justify-center text-bolon-gold">
+                <i class="fa-solid fa-users-viewfinder text-sm"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-2">
+                  <span>PESERTA (READ-ONLY)</span>
+                  <span id="switch-badge-pes-active" class="hidden text-[9px] bg-amber-600 text-slate-950 px-1.5 py-0.2 rounded font-extrabold uppercase">Aktif</span>
+                </div>
+                <div class="text-[10px] text-slate-400">Melihat pengundian, rekaman video, status iuran & kas</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">Tanpa PIN</span>
+          </div>
+          <form onsubmit="handleQuickSwitchPeserta(event)" class="flex gap-2">
+            <select id="switch-select-peserta" class="flex-1 bg-slate-900 border border-slate-700 focus:border-bolon-gold rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none">
+              <option value="">-- Tamu / Anggota Umum --</option>
+            </select>
+            <button type="submit" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 via-bolon-gold to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-heading font-black text-xs transition flex items-center gap-1.5 shadow">
+              <span>Pilih</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500 italic">Beralih peran secara instan tanpa reload</span>
+        <button type="button" onclick="closeSwitchUserModal()" class="py-2 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
           Tutup
         </button>
       </div>

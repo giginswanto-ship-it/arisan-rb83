@@ -447,9 +447,14 @@
 
         <!-- User Role Session Badge & Logout -->
         <div class="flex items-center gap-2 pl-2 border-l border-bolon-border shrink-0">
-          <div id="user-role-badge" class="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+          <div id="user-role-badge" onclick="openSwitchUserModal()" class="px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer hover:ring-2 hover:ring-bolon-gold/50 transition" title="Klik untuk Ganti User / Peran">
             <!-- Populated by JS -->
           </div>
+          <!-- Tombol Ganti User / Switch Role -->
+          <button id="btn-switch-user" onclick="openSwitchUserModal()" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-600/30 via-bolon-card to-amber-700/20 hover:from-amber-600/50 hover:to-amber-700/40 border border-bolon-gold/60 text-amber-300 hover:text-amber-200 transition flex items-center gap-1.5 shadow-sm" title="Ganti Pengguna / Alih Peran">
+            <i class="fa-solid fa-users-gear text-bolon-gold"></i>
+            <span>Ganti User</span>
+          </button>
           <button id="btn-change-pin" onclick="openChangePinModal()" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-bolon-card hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white transition flex items-center gap-1.5 shadow-sm" title="Ganti PIN Keamanan">
             <i class="fa-solid fa-key text-amber-400"></i>
             <span class="hidden sm:inline">Ganti PIN</span>
@@ -620,9 +625,15 @@
               <span>Undi Sekaligus 3</span>
             </button>
           </div>
-          <div id="operator-undian-notice" class="hidden w-full p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/40 text-amber-300 text-xs flex items-center justify-center gap-2">
-            <i class="fa-solid fa-lock text-bolon-gold"></i>
-            <span>Pemutaran undian & kunci periode hanya dapat dioperasikan oleh <b>Operator</b>.</span>
+          <div id="operator-undian-notice" class="hidden w-full p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/40 text-amber-300 text-xs flex items-center justify-center gap-2 flex-wrap">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-lock text-bolon-gold"></i>
+              <span>Pemutaran undian & kunci periode hanya dapat dioperasikan oleh <b>Operator</b>.</span>
+            </div>
+            <button type="button" onclick="openSwitchUserModal('operator')" class="px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-900 text-amber-300 font-bold text-[11px] border border-red-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+              <i class="fa-solid fa-users-gear text-[10px]"></i>
+              <span>Ganti User ke Operator</span>
+            </button>
           </div>
 
           <!-- Status Peserta Sisa Mini Bar -->
@@ -845,9 +856,15 @@
                 <span>Reset Status</span>
               </button>
             </div>
-            <div id="iuran-role-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
-              <i class="fa-solid fa-lock text-bolon-gold"></i>
-              <span>Ceklist iuran hanya dapat diubah oleh <b>Bendahara</b></span>
+            <div id="iuran-role-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-lock text-bolon-gold"></i>
+                <span>Ceklist iuran hanya dapat diubah oleh <b>Bendahara</b></span>
+              </div>
+              <button type="button" onclick="openSwitchUserModal('bendahara')" class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-bold text-[11px] border border-emerald-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+                <i class="fa-solid fa-users-gear text-[10px]"></i>
+                <span>Ganti User ke Bendahara</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1005,9 +1022,15 @@
 
         <!-- Form Tambah Catatan Kas (4 Kols) -->
         <div class="lg:col-span-4 bg-bolon-card border border-bolon-border rounded-2xl p-5 space-y-4">
-          <div id="kas-bendahara-notice" class="hidden p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs flex items-center gap-2 mb-2">
-            <i class="fa-solid fa-lock text-bolon-gold"></i>
-            <span>Hanya <b>Bendahara</b> yang berwenang mencatat mutasi kas.</span>
+          <div id="kas-bendahara-notice" class="hidden p-2.5 rounded-xl bg-amber-950/40 border border-amber-800/50 text-amber-300 text-xs flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-lock text-bolon-gold"></i>
+              <span>Hanya <b>Bendahara</b> yang berwenang mencatat mutasi kas.</span>
+            </div>
+            <button type="button" onclick="openSwitchUserModal('bendahara')" class="px-2.5 py-1 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 font-bold text-[11px] border border-emerald-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+              <i class="fa-solid fa-users-gear text-[10px]"></i>
+              <span>Ganti User ke Bendahara</span>
+            </button>
           </div>
           <h3 class="font-heading font-bold text-sm text-slate-100 flex items-center gap-2">
             <i class="fa-solid fa-pen-to-square text-bolon-gold"></i>
@@ -1109,9 +1132,15 @@
                 <span>Reset Siklus</span>
               </button>
             </div>
-            <div id="peserta-operator-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2">
-              <i class="fa-solid fa-lock text-bolon-gold"></i>
-              <span>Edit peserta & reset siklus hanya dapat dilakukan oleh <b>Operator</b></span>
+            <div id="peserta-operator-notice" class="hidden text-xs text-amber-300 bg-amber-950/40 border border-amber-800/50 px-3 py-1.5 rounded-xl flex items-center gap-2 flex-wrap">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-lock text-bolon-gold"></i>
+                <span>Edit peserta & reset siklus hanya dapat dilakukan oleh <b>Operator</b></span>
+              </div>
+              <button type="button" onclick="openSwitchUserModal('operator')" class="px-2.5 py-1 rounded-lg bg-red-950 hover:bg-red-900 text-amber-300 font-bold text-[11px] border border-red-700/60 transition inline-flex items-center gap-1 cursor-pointer shadow">
+                <i class="fa-solid fa-users-gear text-[10px]"></i>
+                <span>Ganti User ke Operator</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1592,6 +1621,143 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL: GANTI PENGGUNA / ALIH PERAN (SWITCH USER) -->
+  <!-- ======================================================== -->
+  <div id="modal-switch-user" class="modal-overlay hidden fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-bolon-card border-2 border-bolon-gold/60 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 relative my-auto animate-fade-in">
+      
+      <!-- Header Modal -->
+      <div class="flex items-center justify-between border-b border-bolon-border pb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-950/80 border border-bolon-gold/50 flex items-center justify-center text-bolon-gold shadow-md">
+            <i class="fa-solid fa-users-gear text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-heading font-extrabold text-white">Ganti Pengguna / Peran</h3>
+            <p class="text-xs text-amber-300">Beralih akun arisan secara instan tanpa reload</p>
+          </div>
+        </div>
+        <button onclick="closeSwitchUserModal()" class="text-slate-400 hover:text-white text-2xl font-bold transition">&times;</button>
+      </div>
+
+      <!-- Info User Aktif Saat Ini -->
+      <div class="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-semibold tracking-wider block">Akun Aktif Saat Ini:</span>
+          <div id="switch-user-current-info" class="text-xs sm:text-sm font-bold text-white flex items-center gap-2 mt-0.5">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+        <button type="button" onclick="goToFullLoginPortal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-950/70 hover:bg-red-900 border border-red-700/60 text-red-200 transition flex items-center gap-1.5 shadow" title="Kembali ke Portal Halaman Depan">
+          <i class="fa-solid fa-right-from-bracket text-xs"></i>
+          <span>Portal Depan</span>
+        </button>
+      </div>
+
+      <!-- Pesan Error Switch -->
+      <div id="switch-user-error" class="hidden text-xs text-red-300 bg-red-950/60 border border-red-800/80 p-3 rounded-xl flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+        <span id="switch-user-error-text"></span>
+      </div>
+
+      <!-- Opsi Beralih ke 3 Peran -->
+      <div class="space-y-3">
+        <span class="text-xs font-bold text-slate-300 uppercase tracking-wide block">Pilih Akun yang Ingin Dituju:</span>
+
+        <!-- 1. OPERATOR -->
+        <div id="switch-card-operator" class="p-3.5 rounded-2xl bg-gradient-to-r from-red-950/40 via-bolon-card to-bolon-card border border-red-800/40 hover:border-red-500/60 transition space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-red-950 border border-red-600/40 flex items-center justify-center text-red-400">
+                <i class="fa-solid fa-crown text-sm"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-2">
+                  <span>OPERATOR</span>
+                  <span id="switch-badge-op-active" class="hidden text-[9px] bg-red-700 text-white px-1.5 py-0.2 rounded font-extrabold uppercase">Aktif</span>
+                </div>
+                <div class="text-[10px] text-slate-400">Akses undian, kunci periode, durasi, edit peserta</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-red-300 bg-red-950/80 px-2 py-0.5 rounded border border-red-800">Perlu PIN</span>
+          </div>
+          <form onsubmit="handleQuickSwitchOperator(event)" class="flex gap-2">
+            <input type="password" id="switch-pin-operator" maxlength="10" placeholder="PIN Operator (Default: 1945)" class="flex-1 bg-slate-900 border border-slate-700 focus:border-red-500 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none tracking-widest text-center font-bold">
+            <button type="submit" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-red-700 to-bolon-maroon hover:from-red-600 hover:to-red-800 text-white font-heading font-bold text-xs transition flex items-center gap-1.5 shadow">
+              <span>Masuk</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- 2. BENDAHARA -->
+        <div id="switch-card-bendahara" class="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950/40 via-bolon-card to-bolon-card border border-emerald-800/40 hover:border-emerald-500/60 transition space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-emerald-950 border border-emerald-600/40 flex items-center justify-center text-emerald-400">
+                <i class="fa-solid fa-vault text-sm"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-2">
+                  <span>BENDAHARA</span>
+                  <span id="switch-badge-ben-active" class="hidden text-[9px] bg-emerald-700 text-white px-1.5 py-0.2 rounded font-extrabold uppercase">Aktif</span>
+                </div>
+                <div class="text-[10px] text-slate-400">Akses checklist iuran & buku kas Rumah Bolon</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">Perlu PIN</span>
+          </div>
+          <form onsubmit="handleQuickSwitchBendahara(event)" class="flex gap-2">
+            <input type="password" id="switch-pin-bendahara" maxlength="10" placeholder="PIN Bendahara (Default: 2026)" class="flex-1 bg-slate-900 border border-slate-700 focus:border-emerald-500 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none tracking-widest text-center font-bold">
+            <button type="submit" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-heading font-bold text-xs transition flex items-center gap-1.5 shadow">
+              <span>Masuk</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+        <!-- 3. PESERTA -->
+        <div id="switch-card-peserta" class="p-3.5 rounded-2xl bg-gradient-to-r from-amber-950/30 via-bolon-card to-bolon-card border border-amber-800/40 hover:border-amber-500/60 transition space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-amber-950 border border-amber-600/40 flex items-center justify-center text-bolon-gold">
+                <i class="fa-solid fa-users-viewfinder text-sm"></i>
+              </div>
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-2">
+                  <span>PESERTA (READ-ONLY)</span>
+                  <span id="switch-badge-pes-active" class="hidden text-[9px] bg-amber-600 text-slate-950 px-1.5 py-0.2 rounded font-extrabold uppercase">Aktif</span>
+                </div>
+                <div class="text-[10px] text-slate-400">Melihat pengundian, rekaman video, status iuran & kas</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800">Tanpa PIN</span>
+          </div>
+          <form onsubmit="handleQuickSwitchPeserta(event)" class="flex gap-2">
+            <select id="switch-select-peserta" class="flex-1 bg-slate-900 border border-slate-700 focus:border-bolon-gold rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none">
+              <option value="">-- Tamu / Anggota Umum --</option>
+            </select>
+            <button type="submit" class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 via-bolon-gold to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-slate-950 font-heading font-black text-xs transition flex items-center gap-1.5 shadow">
+              <span>Pilih</span>
+              <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+        <span class="text-[11px] text-slate-500 italic">Beralih peran secara instan tanpa reload</span>
+        <button type="button" onclick="closeSwitchUserModal()" class="py-2 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+          Tutup
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- JAVASCRIPT LOGIC -->
   <script>
 /**
@@ -1774,6 +1940,164 @@ function handleBendaharaLoginSubmit(e) {
       input.focus();
     }
   }
+}
+
+// ==========================================
+// FITUR GANTI PENGGUNA / ALIH PERAN (SWITCH USER)
+// ==========================================
+function openSwitchUserModal(focusRole = null) {
+  const modal = document.getElementById('modal-switch-user');
+  if (!modal) return;
+
+  const errBox = document.getElementById('switch-user-error');
+  if (errBox) errBox.classList.add('hidden');
+
+  const pinOp = document.getElementById('switch-pin-operator');
+  const pinBen = document.getElementById('switch-pin-bendahara');
+  if (pinOp) pinOp.value = '';
+  if (pinBen) pinBen.value = '';
+
+  // 1. Tampilkan info user aktif saat ini
+  const curInfo = document.getElementById('switch-user-current-info');
+  if (curInfo) {
+    if (!currentSession || !currentSession.role) {
+      curInfo.innerHTML = `<span class="text-slate-400">Belum Login</span>`;
+    } else {
+      const r = currentSession.role;
+      const u = currentSession.userName || '';
+      if (r === ROLES.OPERATOR) {
+        curInfo.innerHTML = `<span class="px-2 py-0.5 rounded-lg bg-red-950 text-red-300 border border-red-700/60 font-bold flex items-center gap-1.5"><i class="fa-solid fa-crown text-amber-400"></i> OPERATOR</span> <span class="text-slate-300 font-medium text-xs">(${u})</span>`;
+      } else if (r === ROLES.BENDAHARA) {
+        curInfo.innerHTML = `<span class="px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-bold flex items-center gap-1.5"><i class="fa-solid fa-vault text-emerald-400"></i> BENDAHARA</span> <span class="text-slate-300 font-medium text-xs">(${u})</span>`;
+      } else {
+        curInfo.innerHTML = `<span class="px-2 py-0.5 rounded-lg bg-blue-950 text-blue-300 border border-blue-700/60 font-bold flex items-center gap-1.5"><i class="fa-solid fa-user text-blue-400"></i> PESERTA</span> <span class="text-slate-300 font-medium text-xs">(${u})</span>`;
+      }
+    }
+  }
+
+  // 2. Tampilkan badge status peran yang sedang aktif
+  const badgeOp = document.getElementById('switch-badge-op-active');
+  const badgeBen = document.getElementById('switch-badge-ben-active');
+  const badgePes = document.getElementById('switch-badge-pes-active');
+  const curRole = currentSession ? currentSession.role : null;
+
+  if (badgeOp) badgeOp.classList.toggle('hidden', curRole !== ROLES.OPERATOR);
+  if (badgeBen) badgeBen.classList.toggle('hidden', curRole !== ROLES.BENDAHARA);
+  if (badgePes) badgePes.classList.toggle('hidden', curRole !== ROLES.PESERTA);
+
+  // 3. Muat daftar 36 peserta ke dropdown
+  populateSwitchPesertaDropdown();
+
+  modal.classList.remove('hidden');
+
+  // Fokuskan input jika ada request peran spesifik
+  if (focusRole === 'operator' && pinOp) {
+    setTimeout(() => pinOp.focus(), 120);
+  } else if (focusRole === 'bendahara' && pinBen) {
+    setTimeout(() => pinBen.focus(), 120);
+  }
+}
+
+function closeSwitchUserModal() {
+  const modal = document.getElementById('modal-switch-user');
+  if (modal) modal.classList.add('hidden');
+}
+
+function populateSwitchPesertaDropdown() {
+  const select = document.getElementById('switch-select-peserta');
+  if (!select) return;
+
+  const currentVal = select.value;
+  select.innerHTML = `<option value="">-- Tamu / Anggota Umum --</option>`;
+
+  const list = (appState && appState.participants && appState.participants.length > 0)
+    ? appState.participants
+    : DEFAULT_PARTICIPANTS;
+
+  list.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.name;
+    opt.textContent = p.name;
+    select.appendChild(opt);
+  });
+
+  if (currentSession && currentSession.role === ROLES.PESERTA && currentSession.userName) {
+    select.value = currentSession.userName;
+  } else if (currentVal) {
+    select.value = currentVal;
+  }
+}
+
+function showSwitchError(msg) {
+  const errBox = document.getElementById('switch-user-error');
+  const errText = document.getElementById('switch-user-error-text');
+  if (errBox && errText) {
+    errText.textContent = msg;
+    errBox.classList.remove('hidden');
+  } else {
+    alert(msg);
+  }
+}
+
+function handleQuickSwitchOperator(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('switch-pin-operator');
+  const pin = (input ? input.value : '').trim();
+  const activePin = getStoredPins().operator;
+
+  if (pin === activePin || pin.toLowerCase() === 'operator') {
+    saveSession(ROLES.OPERATOR, 'Operator Utama');
+    closeSwitchUserModal();
+    showAppView();
+    if (input) input.value = '';
+    alert("✔ Sukses beralih akun ke: OPERATOR (Akses Penuh)");
+  } else {
+    showSwitchError("PIN Operator salah! Masukkan PIN yang benar (Default: 1945).");
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+function handleQuickSwitchBendahara(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('switch-pin-bendahara');
+  const pin = (input ? input.value : '').trim();
+  const activePin = getStoredPins().bendahara;
+
+  if (pin === activePin || pin.toLowerCase() === 'bendahara') {
+    saveSession(ROLES.BENDAHARA, 'Bendahara Keuangan');
+    closeSwitchUserModal();
+    showAppView();
+    if (input) input.value = '';
+    alert("✔ Sukses beralih akun ke: BENDAHARA (Akses Keuangan)");
+  } else {
+    showSwitchError("PIN Bendahara salah! Masukkan PIN yang benar (Default: 2026).");
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+function handleQuickSwitchPeserta(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const select = document.getElementById('switch-select-peserta');
+  let selectedName = select ? select.value : '';
+  if (!selectedName) {
+    selectedName = 'Anggota Peserta';
+  }
+  saveSession(ROLES.PESERTA, selectedName);
+  closeSwitchUserModal();
+  showAppView();
+  alert(`✔ Sukses beralih akun ke: PESERTA (${selectedName})`);
+}
+
+function goToFullLoginPortal() {
+  closeSwitchUserModal();
+  clearSession();
+  showLoginPortal();
 }
 
 // ==========================================
@@ -2046,14 +2370,16 @@ function applyRolePermissions() {
   // 1. Header Role Badge
   const badge = document.getElementById('user-role-badge');
   if (badge) {
+    badge.setAttribute('onclick', 'openSwitchUserModal()');
+    badge.setAttribute('title', 'Klik untuk Ganti User / Peran');
     if (role === ROLES.OPERATOR) {
-      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-red-950 via-bolon-maroon to-red-900 text-amber-300 border border-bolon-gold/40';
+      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-red-950 via-bolon-maroon to-red-900 text-amber-300 border border-bolon-gold/40 cursor-pointer hover:ring-2 hover:ring-amber-400/50 transition';
       badge.innerHTML = `<i class="fa-solid fa-crown text-amber-400"></i><span>OPERATOR</span>`;
     } else if (role === ROLES.BENDAHARA) {
-      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-emerald-950 via-teal-950 to-emerald-900 text-emerald-300 border border-emerald-500/40';
+      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-emerald-950 via-teal-950 to-emerald-900 text-emerald-300 border border-emerald-500/40 cursor-pointer hover:ring-2 hover:ring-emerald-400/50 transition';
       badge.innerHTML = `<i class="fa-solid fa-vault text-emerald-400"></i><span>BENDAHARA</span>`;
     } else {
-      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-blue-300 border border-blue-500/40';
+      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-blue-300 border border-blue-500/40 cursor-pointer hover:ring-2 hover:ring-blue-400/50 transition';
       let cleanName = userName;
       if (cleanName.length > 15) cleanName = cleanName.substring(0, 13) + '..';
       badge.innerHTML = `<i class="fa-solid fa-user text-blue-400"></i><span>${cleanName}</span>`;

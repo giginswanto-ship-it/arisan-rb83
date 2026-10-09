@@ -181,6 +181,164 @@ function handleBendaharaLoginSubmit(e) {
 }
 
 // ==========================================
+// FITUR GANTI PENGGUNA / ALIH PERAN (SWITCH USER)
+// ==========================================
+function openSwitchUserModal(focusRole = null) {
+  const modal = document.getElementById('modal-switch-user');
+  if (!modal) return;
+
+  const errBox = document.getElementById('switch-user-error');
+  if (errBox) errBox.classList.add('hidden');
+
+  const pinOp = document.getElementById('switch-pin-operator');
+  const pinBen = document.getElementById('switch-pin-bendahara');
+  if (pinOp) pinOp.value = '';
+  if (pinBen) pinBen.value = '';
+
+  // 1. Tampilkan info user aktif saat ini
+  const curInfo = document.getElementById('switch-user-current-info');
+  if (curInfo) {
+    if (!currentSession || !currentSession.role) {
+      curInfo.innerHTML = `<span class="text-slate-400">Belum Login</span>`;
+    } else {
+      const r = currentSession.role;
+      const u = currentSession.userName || '';
+      if (r === ROLES.OPERATOR) {
+        curInfo.innerHTML = `<span class="px-2 py-0.5 rounded-lg bg-red-950 text-red-300 border border-red-700/60 font-bold flex items-center gap-1.5"><i class="fa-solid fa-crown text-amber-400"></i> OPERATOR</span> <span class="text-slate-300 font-medium text-xs">(${u})</span>`;
+      } else if (r === ROLES.BENDAHARA) {
+        curInfo.innerHTML = `<span class="px-2 py-0.5 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-bold flex items-center gap-1.5"><i class="fa-solid fa-vault text-emerald-400"></i> BENDAHARA</span> <span class="text-slate-300 font-medium text-xs">(${u})</span>`;
+      } else {
+        curInfo.innerHTML = `<span class="px-2 py-0.5 rounded-lg bg-blue-950 text-blue-300 border border-blue-700/60 font-bold flex items-center gap-1.5"><i class="fa-solid fa-user text-blue-400"></i> PESERTA</span> <span class="text-slate-300 font-medium text-xs">(${u})</span>`;
+      }
+    }
+  }
+
+  // 2. Tampilkan badge status peran yang sedang aktif
+  const badgeOp = document.getElementById('switch-badge-op-active');
+  const badgeBen = document.getElementById('switch-badge-ben-active');
+  const badgePes = document.getElementById('switch-badge-pes-active');
+  const curRole = currentSession ? currentSession.role : null;
+
+  if (badgeOp) badgeOp.classList.toggle('hidden', curRole !== ROLES.OPERATOR);
+  if (badgeBen) badgeBen.classList.toggle('hidden', curRole !== ROLES.BENDAHARA);
+  if (badgePes) badgePes.classList.toggle('hidden', curRole !== ROLES.PESERTA);
+
+  // 3. Muat daftar 36 peserta ke dropdown
+  populateSwitchPesertaDropdown();
+
+  modal.classList.remove('hidden');
+
+  // Fokuskan input jika ada request peran spesifik
+  if (focusRole === 'operator' && pinOp) {
+    setTimeout(() => pinOp.focus(), 120);
+  } else if (focusRole === 'bendahara' && pinBen) {
+    setTimeout(() => pinBen.focus(), 120);
+  }
+}
+
+function closeSwitchUserModal() {
+  const modal = document.getElementById('modal-switch-user');
+  if (modal) modal.classList.add('hidden');
+}
+
+function populateSwitchPesertaDropdown() {
+  const select = document.getElementById('switch-select-peserta');
+  if (!select) return;
+
+  const currentVal = select.value;
+  select.innerHTML = `<option value="">-- Tamu / Anggota Umum --</option>`;
+
+  const list = (appState && appState.participants && appState.participants.length > 0)
+    ? appState.participants
+    : DEFAULT_PARTICIPANTS;
+
+  list.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.name;
+    opt.textContent = p.name;
+    select.appendChild(opt);
+  });
+
+  if (currentSession && currentSession.role === ROLES.PESERTA && currentSession.userName) {
+    select.value = currentSession.userName;
+  } else if (currentVal) {
+    select.value = currentVal;
+  }
+}
+
+function showSwitchError(msg) {
+  const errBox = document.getElementById('switch-user-error');
+  const errText = document.getElementById('switch-user-error-text');
+  if (errBox && errText) {
+    errText.textContent = msg;
+    errBox.classList.remove('hidden');
+  } else {
+    alert(msg);
+  }
+}
+
+function handleQuickSwitchOperator(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('switch-pin-operator');
+  const pin = (input ? input.value : '').trim();
+  const activePin = getStoredPins().operator;
+
+  if (pin === activePin || pin.toLowerCase() === 'operator') {
+    saveSession(ROLES.OPERATOR, 'Operator Utama');
+    closeSwitchUserModal();
+    showAppView();
+    if (input) input.value = '';
+    alert("✔ Sukses beralih akun ke: OPERATOR (Akses Penuh)");
+  } else {
+    showSwitchError("PIN Operator salah! Masukkan PIN yang benar (Default: 1945).");
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+function handleQuickSwitchBendahara(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const input = document.getElementById('switch-pin-bendahara');
+  const pin = (input ? input.value : '').trim();
+  const activePin = getStoredPins().bendahara;
+
+  if (pin === activePin || pin.toLowerCase() === 'bendahara') {
+    saveSession(ROLES.BENDAHARA, 'Bendahara Keuangan');
+    closeSwitchUserModal();
+    showAppView();
+    if (input) input.value = '';
+    alert("✔ Sukses beralih akun ke: BENDAHARA (Akses Keuangan)");
+  } else {
+    showSwitchError("PIN Bendahara salah! Masukkan PIN yang benar (Default: 2026).");
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+function handleQuickSwitchPeserta(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const select = document.getElementById('switch-select-peserta');
+  let selectedName = select ? select.value : '';
+  if (!selectedName) {
+    selectedName = 'Anggota Peserta';
+  }
+  saveSession(ROLES.PESERTA, selectedName);
+  closeSwitchUserModal();
+  showAppView();
+  alert(`✔ Sukses beralih akun ke: PESERTA (${selectedName})`);
+}
+
+function goToFullLoginPortal() {
+  closeSwitchUserModal();
+  clearSession();
+  showLoginPortal();
+}
+
+// ==========================================
 // FITUR GANTI PIN KEAMANAN (OPERATOR & BENDAHARA)
 // ==========================================
 function openChangePinModal(targetRole = null) {
@@ -450,14 +608,16 @@ function applyRolePermissions() {
   // 1. Header Role Badge
   const badge = document.getElementById('user-role-badge');
   if (badge) {
+    badge.setAttribute('onclick', 'openSwitchUserModal()');
+    badge.setAttribute('title', 'Klik untuk Ganti User / Peran');
     if (role === ROLES.OPERATOR) {
-      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-red-950 via-bolon-maroon to-red-900 text-amber-300 border border-bolon-gold/40';
+      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-red-950 via-bolon-maroon to-red-900 text-amber-300 border border-bolon-gold/40 cursor-pointer hover:ring-2 hover:ring-amber-400/50 transition';
       badge.innerHTML = `<i class="fa-solid fa-crown text-amber-400"></i><span>OPERATOR</span>`;
     } else if (role === ROLES.BENDAHARA) {
-      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-emerald-950 via-teal-950 to-emerald-900 text-emerald-300 border border-emerald-500/40';
+      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-emerald-950 via-teal-950 to-emerald-900 text-emerald-300 border border-emerald-500/40 cursor-pointer hover:ring-2 hover:ring-emerald-400/50 transition';
       badge.innerHTML = `<i class="fa-solid fa-vault text-emerald-400"></i><span>BENDAHARA</span>`;
     } else {
-      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-blue-300 border border-blue-500/40';
+      badge.className = 'px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-blue-300 border border-blue-500/40 cursor-pointer hover:ring-2 hover:ring-blue-400/50 transition';
       let cleanName = userName;
       if (cleanName.length > 15) cleanName = cleanName.substring(0, 13) + '..';
       badge.innerHTML = `<i class="fa-solid fa-user text-blue-400"></i><span>${cleanName}</span>`;

@@ -7,11 +7,6 @@ echo       JSON Disk Database + REST API (IndexedDB Sync)
 echo ===================================================================
 echo.
 cd /d "%~dp0"
-if not exist server.js (
-    if exist "ARISAN RUMAH BOLON\server.js" (
-        cd /d "%~dp0\ARISAN RUMAH BOLON"
-    )
-)
 
 where node >nul 2>nul
 if %errorlevel% neq 0 (
