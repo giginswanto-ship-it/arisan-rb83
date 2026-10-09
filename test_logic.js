@@ -68,4 +68,39 @@ const wonCount = participants.filter(p => p.won).length;
 assert.strictEqual(wonCount, 36, "Semua 36 peserta harus sudah menang");
 console.log("✔ Simulasi Pengundian 12 Bulan: Seluruh 36 peserta menang tepat 1 kali tanpa duplikasi!");
 
-console.log("\n>>> SEMUA 6 PENGUJIAN LOGIKA BERHASIL 100% (PASS) <<<");
+// 7. Pengujian Sistem Anti-Duplikasi Berlapis (Multi-Source Protection)
+function testIsParticipantAlreadyWon(pId, st) {
+  const p = (st.participants || []).find(item => item.id === pId);
+  if (p && p.wonPeriod != null && p.wonPeriod > 0) return true;
+  if (Array.isArray(st.currentMonthWinners) && st.currentMonthWinners.some(w => w.id === pId)) return true;
+  if (Array.isArray(st.history)) {
+    for (const h of st.history) {
+      if (Array.isArray(h.winners) && h.winners.some(w => w.id === pId)) return true;
+    }
+  }
+  return false;
+}
+
+const mockState = {
+  currentPeriod: 2,
+  participants: Array.from({ length: 36 }, (_, i) => ({ id: i + 1, name: `Peserta ${i + 1}`, wonPeriod: null })),
+  currentMonthWinners: [{ id: 4, name: "Peserta 4", wonPeriod: 2, wonSlot: 1 }],
+  history: [
+    { period: 1, winners: [{ id: 1 }, { id: 2 }, { id: 3 }] }
+  ]
+};
+
+// Peserta 1, 2, 3 (riwayat bulan 1) & Peserta 4 (pemenang bulan 2 slot 1) HARUS terdeteksi sudah menang
+assert.strictEqual(testIsParticipantAlreadyWon(1, mockState), true, "Peserta 1 dari riwayat harus terdeteksi sudah menang");
+assert.strictEqual(testIsParticipantAlreadyWon(2, mockState), true, "Peserta 2 dari riwayat harus terdeteksi sudah menang");
+assert.strictEqual(testIsParticipantAlreadyWon(3, mockState), true, "Peserta 3 dari riwayat harus terdeteksi sudah menang");
+assert.strictEqual(testIsParticipantAlreadyWon(4, mockState), true, "Peserta 4 dari slot aktif harus terdeteksi sudah menang");
+assert.strictEqual(testIsParticipantAlreadyWon(5, mockState), false, "Peserta 5 belum menang harus terdeteksi false");
+
+// Hitung eligible participants: harus tepat 32 peserta (36 - 3 riwayat - 1 slot aktif)
+const mockEligible = mockState.participants.filter(p => !testIsParticipantAlreadyWon(p.id, mockState));
+assert.strictEqual(mockEligible.length, 32, "Peserta eligible harus tersisa 32 orang");
+assert.strictEqual(mockEligible.some(p => [1, 2, 3, 4].includes(p.id)), false, "Tidak boleh ada pemenang sebelumnya di daftar eligible");
+console.log("✔ Sistem Anti-Duplikasi Berlapis: Pemenang riwayat & pemenang slot aktif 100% diblokir dari undian!");
+
+console.log("\n>>> SEMUA 7 PENGUJIAN LOGIKA BERHASIL 100% (PASS) <<<");

@@ -1107,6 +1107,7 @@ async function initApp() {
       const json = await res.json();
       if (json && json.success && json.data && json.data.state && json.data.state.participants) {
         appState = json.data.state;
+        reconcileAndSyncWinnerStatus();
         if (json.data.pins) {
           try { localStorage.setItem(PINS_STORAGE_KEY, JSON.stringify(json.data.pins)); } catch(e){}
         }
@@ -1123,6 +1124,7 @@ async function initApp() {
     const idbState = await loadStateFromIndexedDB();
     if (idbState && idbState.participants && idbState.participants.length === TOTAL_PARTICIPANTS) {
       appState = idbState;
+      reconcileAndSyncWinnerStatus();
       renderAll();
     }
   }
@@ -1153,6 +1155,9 @@ function loadState() {
   if (!appState.history) appState.history = [];
   if (!appState.kasLedger) appState.kasLedger = [];
   if (!appState.spinDuration) appState.spinDuration = 5;
+
+  // Rekonsiliasi integritas status pemenang anti-duplikasi
+  reconcileAndSyncWinnerStatus();
 
   // Update sound icon state
   const icon = document.getElementById('sound-icon');
@@ -1200,9 +1205,111 @@ function initWheelCanvas() {
   drawWheel();
 }
 
-// Dapatkan peserta yang belum pernah menang (eligible untuk diundi)
+// ========================================================
+// SISTEM INTEGRITAS & ANTI-DUPLIKASI PEMENANG (GUARANTEED NO REPEAT)
+// Menjamin 100% peserta yang sudah pernah menang TIDAK PERNAH diikutkan dalam undian lagi
+// ========================================================
+function reconcileAndSyncWinnerStatus() {
+  if (!appState || !Array.isArray(appState.participants)) return;
+
+  const wonMap = new Map(); // id -> { wonPeriod, wonSlot, wonDate }
+
+  // 1. Kumpulkan seluruh pemenang dari riwayat 12 periode yang sudah tersimpan (history)
+  if (Array.isArray(appState.history)) {
+    appState.history.forEach(h => {
+      if (Array.isArray(h.winners)) {
+        h.winners.forEach((w, idx) => {
+          if (w && w.id != null) {
+            wonMap.set(Number(w.id), {
+              wonPeriod: Number(h.period || w.wonPeriod || 1),
+              wonSlot: Number(w.wonSlot || (idx + 1)),
+              wonDate: w.wonDate || h.date || formatIndonesianDate(new Date())
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // 2. Kumpulkan pemenang dari bulan aktif yang sedang berjalan (currentMonthWinners)
+  if (Array.isArray(appState.currentMonthWinners)) {
+    appState.currentMonthWinners.forEach((w, idx) => {
+      if (w && w.id != null) {
+        wonMap.set(Number(w.id), {
+          wonPeriod: Number(w.wonPeriod || appState.currentPeriod || 1),
+          wonSlot: Number(w.wonSlot || (idx + 1)),
+          wonDate: w.wonDate || formatIndonesianDate(new Date())
+        });
+      }
+    });
+  }
+
+  // 3. Kumpulkan pemenang dari tanda wonPeriod pada peserta itu sendiri
+  appState.participants.forEach(p => {
+    const pId = Number(p.id);
+    if (p.wonPeriod && Number(p.wonPeriod) > 0 && !wonMap.has(pId)) {
+      wonMap.set(pId, {
+        wonPeriod: Number(p.wonPeriod),
+        wonSlot: Number(p.wonSlot || 1),
+        wonDate: p.wonDate || formatIndonesianDate(new Date())
+      });
+    }
+  });
+
+  // 4. Sinkronkan kembali secara konsisten ke seluruh 36 peserta
+  appState.participants.forEach(p => {
+    const pId = Number(p.id);
+    if (wonMap.has(pId)) {
+      const info = wonMap.get(pId);
+      p.wonPeriod = info.wonPeriod;
+      p.wonSlot = info.wonSlot;
+      p.wonDate = info.wonDate;
+    } else {
+      p.wonPeriod = null;
+      p.wonSlot = null;
+      p.wonDate = null;
+    }
+  });
+}
+
+// Cek apakah seorang peserta tertentu sudah pernah menang (berdasarkan ID)
+function isParticipantAlreadyWon(participantId) {
+  if (participantId == null) return false;
+  const pId = Number(participantId);
+
+  // 1. Cek dari field wonPeriod objek peserta
+  if (Array.isArray(appState.participants)) {
+    const p = appState.participants.find(item => Number(item.id) === pId);
+    if (p && p.wonPeriod != null && Number(p.wonPeriod) > 0) {
+      return true;
+    }
+  }
+
+  // 2. Cek dari pemenang bulan aktif saat ini (currentMonthWinners)
+  if (Array.isArray(appState.currentMonthWinners)) {
+    if (appState.currentMonthWinners.some(w => Number(w.id) === pId)) {
+      return true;
+    }
+  }
+
+  // 3. Cek dari seluruh 12 periode riwayat pengundian yang sudah tersimpan (history)
+  if (Array.isArray(appState.history)) {
+    for (const h of appState.history) {
+      if (Array.isArray(h.winners) && h.winners.some(w => Number(w.id) === pId)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+// Dapatkan HANYA peserta yang BELUM PERNAH MENANG (Eligible untuk diundi)
 function getEligibleParticipants() {
-  return appState.participants.filter(p => !p.wonPeriod);
+  // Selalu jalankan sinkronisasi pemenang agar data state 100% konsisten
+  reconcileAndSyncWinnerStatus();
+
+  return (appState.participants || []).filter(p => !isParticipantAlreadyWon(p.id));
 }
 
 function drawWheel() {
@@ -1523,7 +1630,21 @@ function spinNextWinner() {
 
   // Pilih acak salah satu peserta eligible
   const winningIndex = Math.floor(Math.random() * eligible.length);
-  const winner = eligible[winningIndex];
+  let winner = eligible[winningIndex];
+
+  // Failsafe anti-duplikasi: pastikan pemenang terpilih 100% belum pernah menang
+  if (isParticipantAlreadyWon(winner.id)) {
+    const strictlyEligible = eligible.filter(p => !isParticipantAlreadyWon(p.id));
+    if (strictlyEligible.length === 0) {
+      isSpinning = false;
+      document.getElementById('btn-spin-single').disabled = false;
+      document.getElementById('btn-spin-all').disabled = false;
+      alert("Semua peserta yang tersisa sudah pernah menang.");
+      return;
+    }
+    winner = strictlyEligible[Math.floor(Math.random() * strictlyEligible.length)];
+  }
+
   const arc = (2 * Math.PI) / eligible.length;
 
   // Penunjuk roda ada di posisi TOP (sudut 270 derajat atau 3*PI/2)
@@ -1578,14 +1699,19 @@ function spinNextWinner() {
     if (progress < 1) {
       requestAnimationFrame(animateSpin);
     } else {
-      // Pengundian Selesai - Pemenang didapatkan!
-      isSpinning = false;
+      // Pendaratan Roda Selesai - Pemenang sah didapatkan!
       stopSuspenseDrumRoll();
-      document.getElementById('btn-spin-single').disabled = false;
-      document.getElementById('btn-spin-all').disabled = false;
 
       const nextSlot = appState.currentMonthWinners.length + 1;
       const winnerWithSlot = { ...winner, wonSlot: nextSlot, wonPeriod: appState.currentPeriod };
+
+      // KUNCI STATUS PEMENANG INSTAN pada peserta agar tidak bisa terpilih ulang di proses apapun
+      const pIdx = appState.participants.findIndex(p => p.id === winner.id);
+      if (pIdx !== -1) {
+        appState.participants[pIdx].wonPeriod = appState.currentPeriod;
+        appState.participants[pIdx].wonSlot = nextSlot;
+        appState.participants[pIdx].wonDate = formatIndonesianDate(new Date());
+      }
 
       // 1. Tampilkan banner perayaan di canvas roda agar terekam visual dalam video pengundian
       startCelebrationCanvasAnimation(winnerWithSlot);
@@ -1614,6 +1740,10 @@ function spinNextWinner() {
 
           // Catat pemenang & buka modal perayaan dengan video yang SUDAH SELESAI & SIAP DIBAGIKAN
           recordWinner(winner, videoBlob);
+
+          // Selesaikan status putaran secara resmi setelah seluruh pencatatan & video selesai
+          isSpinning = false;
+          renderUndianTab();
         });
       }, 850);
     }
@@ -1634,8 +1764,11 @@ function recordWinner(winner, videoBlob = null) {
     wonDate: nowStr
   };
 
-  // Simpan ke state
-  appState.currentMonthWinners.push(winnerData);
+  // Simpan ke state jika belum ada
+  const existingIndex = appState.currentMonthWinners.findIndex(w => w.id === winner.id);
+  if (existingIndex === -1) {
+    appState.currentMonthWinners.push(winnerData);
+  }
 
   // Update data peserta di array utama
   const pIndex = appState.participants.findIndex(p => p.id === winner.id);
@@ -1644,6 +1777,9 @@ function recordWinner(winner, videoBlob = null) {
     appState.participants[pIndex].wonSlot = slotNumber;
     appState.participants[pIndex].wonDate = nowStr;
   }
+
+  // Rekonsiliasi pemenang untuk integritas absolut
+  reconcileAndSyncWinnerStatus();
 
   saveState();
   renderAll();
@@ -1718,9 +1854,15 @@ function undoLastWinner() {
     appState.participants[pIndex].wonDate = null;
   }
 
+  // Bersihkan juga cache rekaman video slot jika ada
+  if (typeof slotRecordedVideos !== 'undefined' && slotRecordedVideos[lastWinner.wonSlot]) {
+    delete slotRecordedVideos[lastWinner.wonSlot];
+  }
+
+  reconcileAndSyncWinnerStatus();
   saveState();
   renderAll();
-  alert(`Pemenang '${lastWinner.name}' di slot #${lastWinner.wonSlot} telah dibatalkan.`);
+  alert(`Pemenang '${lastWinner.name}' di slot #${lastWinner.wonSlot} telah dibatalkan dan dikembalikan ke daftar peserta yang berhak diundi.`);
 }
 
 // Kunci Periode dan lanjut ke bulan berikutnya (Membukukan Kas Rp 600.000)
@@ -3166,21 +3308,23 @@ function renderPesertaTab() {
   const tbody = document.getElementById('participants-table-body');
   if (!tbody) return;
 
+  reconcileAndSyncWinnerStatus();
+
   let html = '';
   appState.participants.forEach(p => {
-    const hasWon = !!p.wonPeriod;
+    const hasWon = isParticipantAlreadyWon(p.id);
     html += `
       <tr class="hover:bg-bolon-card ${hasWon ? 'bg-amber-950/10' : ''}">
         <td class="py-3 px-3 text-center font-bold text-slate-400">${p.id}</td>
         <td class="py-3 px-4 font-semibold text-slate-200">${p.name}</td>
         <td class="py-3 px-4 text-slate-400">${p.phone || '-'}</td>
         <td class="py-3 px-4">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${hasWon ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-slate-800 text-slate-400'}">
-            ${hasWon ? `SUDAH MENANG (#${p.wonSlot})` : 'BELUM'}
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${hasWon ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-slate-800 text-slate-400'}">
+            ${hasWon ? `<i class="fa-solid fa-trophy text-amber-400 mr-1"></i> SUDAH MENANG (Slot #${p.wonSlot || 1})` : '<i class="fa-solid fa-hourglass-half text-slate-400 mr-1"></i> BELUM MENANG'}
           </span>
         </td>
         <td class="py-3 px-4 text-center font-bold ${hasWon ? 'text-amber-300' : 'text-slate-600'}">
-          ${hasWon ? `Bulan ke-${p.wonPeriod}` : '-'}
+          ${hasWon && p.wonPeriod ? `Bulan ke-${p.wonPeriod}` : '-'}
         </td>
         <td class="py-3 px-3 text-center">
           ${isOperator ? `
