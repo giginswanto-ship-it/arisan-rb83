@@ -1320,6 +1320,7 @@ let lastRecordedVideoBlob = null;
 let lastRecordedVideoUrl = null;
 let recordTimerInterval = null;
 let recordSeconds = 0;
+let slotRecordedVideos = {}; // Menyimpan berkas rekaman video per slot (1, 2, 3)
 
 function isDrawRecordingActive() {
   return mediaRecorder && mediaRecorder.state === 'recording';
@@ -1355,24 +1356,28 @@ function startDrawRecording() {
   try {
     const ctx = getAudioContext(); // Pastikan node audio stream & master output aktif
     const canvasStream = canvasElem.captureStream(30); // 30 FPS
-    const tracks = [...canvasStream.getVideoTracks()];
+    const videoTracks = canvasStream.getVideoTracks();
+    let streamToRecord = canvasStream;
 
     // GABUNGKAN AUDIO TRACK DARI WEB AUDIO API DESTINATION (TICK, DRUMROLL, DENTUMAN MENGGELEGAR)
     if (audioStreamDest && audioStreamDest.stream) {
-      const audioTracks = audioStreamDest.stream.getAudioTracks();
-      if (audioTracks && audioTracks.length > 0) {
-        tracks.push(audioTracks[0]);
+      try {
+        const audioTracks = audioStreamDest.stream.getAudioTracks();
+        if (audioTracks && audioTracks.length > 0) {
+          streamToRecord = new MediaStream([...videoTracks, audioTracks[0]]);
+        }
+      } catch (aErr) {
+        streamToRecord = canvasStream;
       }
     }
-
-    const combinedStream = new MediaStream(tracks);
 
     let mime = 'video/webm;codecs=vp9,opus';
     if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm;codecs=vp8,opus';
     if (!MediaRecorder.isTypeSupported(mime)) mime = 'video/webm';
     if (!MediaRecorder.isTypeSupported(mime)) mime = '';
 
-    mediaRecorder = mime ? new MediaRecorder(combinedStream, { mimeType: mime }) : new MediaRecorder(combinedStream);
+    const options = mime ? { mimeType: mime } : undefined;
+    mediaRecorder = new MediaRecorder(streamToRecord, options);
     mediaRecorder.ondataavailable = function(e) {
       if (e.data && e.data.size > 0) {
         recordedChunks.push(e.data);
@@ -1495,22 +1500,43 @@ function spinNextWinner() {
     if (progress < 1) {
       requestAnimationFrame(animateSpin);
     } else {
-      // Pengundian Selesai
+      // Pengundian Selesai - Pemenang didapatkan!
       isSpinning = false;
       stopSuspenseDrumRoll();
       document.getElementById('btn-spin-single').disabled = false;
       document.getElementById('btn-spin-all').disabled = false;
 
-      // 1. Tampilkan banner perayaan di canvas roda agar terekam visual dalam video pengundian
       const nextSlot = appState.currentMonthWinners.length + 1;
       const winnerWithSlot = { ...winner, wonSlot: nextSlot, wonPeriod: appState.currentPeriod };
+
+      // 1. Tampilkan banner perayaan di canvas roda agar terekam visual dalam video pengundian
       startCelebrationCanvasAnimation(winnerWithSlot);
 
-      // 2. Catat pemenang & bunyikan audio menggelegar + screen shake + confetti + buka modal
-      recordWinner(winner);
+      if (liveDisplay) {
+        liveDisplay.innerHTML = `<span class="text-sm font-black text-amber-300 tracking-wide animate-bounce">🏆 Pemenang Terpilih: <b>${winner.name}</b></span>`;
+      }
 
-      // PEREKAMAN TETAP BERJALAN MEREKAM PERAYAAN & AUDIO MENGGELEGAR!
-      // Rekaman baru berhenti setelah pop-up pemenang berhenti (ditutup pengguna atau tombol stop rekam diklik).
+      // Bunyikan dentuman kemenangan
+      playThunderousBoom();
+
+      // 2. RECORDING BERHENTI KETIKA SUDAH DIDAPATKAN PEMENANG UNDIAN ARISAN!
+      // Beri jeda 850ms agar momen pendaratan roda & banner pemenang terekam sempurna di akhir video
+      setTimeout(() => {
+        stopDrawRecording(function(videoBlob) {
+          stopCelebrationCanvasAnimation();
+
+          if (videoBlob) {
+            slotRecordedVideos[nextSlot] = {
+              blob: videoBlob,
+              url: URL.createObjectURL(videoBlob),
+              winner: winnerWithSlot
+            };
+          }
+
+          // Catat pemenang & buka modal perayaan dengan video yang SUDAH SELESAI & SIAP DIBAGIKAN
+          recordWinner(winner, videoBlob);
+        });
+      }, 850);
     }
   }
 
@@ -1543,12 +1569,11 @@ function recordWinner(winner, videoBlob = null) {
   saveState();
   renderAll();
 
-  // EFEK AUDIO MENGGELEGAR & GUNCANGAN LAYAR SPEKTAKULER
-  playThunderousBoom();
+  // EFEK GUNCANGAN LAYAR SPEKTAKULER & CONFETTI
   triggerScreenShake();
   triggerCelebrationConfetti();
 
-  // Buka popup selamat berfont raksasa dengan pemutar video rekaman
+  // Buka popup selamat berfont raksasa dengan pemutar video rekaman yang SUDAH SIAP
   showWinnerCelebration(winnerData, slotNumber, videoBlob);
 }
 
@@ -1917,15 +1942,7 @@ function manualStopDrawRecording() {
 
   const btnStop = document.getElementById('btn-stop-rec-manual');
   if (btnStop) {
-    btnStop.disabled = true;
-    btnStop.classList.add('opacity-50', 'cursor-not-allowed');
-    btnStop.innerHTML = `<i class="fa-solid fa-check text-[9px]"></i><span>Rekaman Disimpan</span>`;
-  }
-
-  const videoStatus = document.getElementById('celeb-video-status');
-  if (videoStatus) {
-    videoStatus.textContent = 'Menyelesaikan Video + Audio HD...';
-    videoStatus.className = 'text-[10px] px-2.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold animate-pulse';
+    btnStop.classList.add('hidden');
   }
 
   stopCelebrationCanvasAnimation();
@@ -1945,42 +1962,55 @@ function showWinnerCelebration(winner, slotNumber, videoBlob = null) {
   document.getElementById('celeb-slot-title').textContent = `Pemenang Ke-${slotNumber} • Periode Bulan ke-${appState.currentPeriod}`;
   document.getElementById('celeb-winner-name').textContent = winner.name;
 
-  // Reset tombol Stop Rekam manual di popup
-  const btnStop = document.getElementById('btn-stop-rec-manual');
-  if (btnStop) {
-    btnStop.disabled = false;
-    btnStop.classList.remove('opacity-50', 'cursor-not-allowed');
-    btnStop.innerHTML = `<i class="fa-solid fa-stop text-[9px]"></i><span>Stop Rekam</span>`;
-  }
-
   const videoSection = document.getElementById('celeb-video-section');
   const videoPlayer = document.getElementById('celeb-video-player');
   const videoStatus = document.getElementById('celeb-video-status');
+  const btnStop = document.getElementById('btn-stop-rec-manual');
 
   if (videoSection) videoSection.classList.remove('hidden');
+  if (btnStop) btnStop.classList.add('hidden'); // Rekaman sudah selesai otomatis saat pemenang didapatkan
 
-  if (isDrawRecordingActive()) {
-    if (videoStatus) {
-      videoStatus.textContent = '🔴 Sedang Merekam Perayaan...';
-      videoStatus.className = 'text-[10px] px-2.5 py-0.5 rounded bg-red-950/80 text-red-300 border border-red-700 font-bold animate-pulse';
-    }
-    // Auto-stop cadangan 15 detik jika pengguna membiarkan pop-up terbuka tanpa interaksi
-    if (celebrationAutoStopTimer) clearTimeout(celebrationAutoStopTimer);
-    celebrationAutoStopTimer = setTimeout(() => {
-      if (isDrawRecordingActive()) {
-        manualStopDrawRecording();
-      }
-    }, 15000);
-  } else if (lastRecordedVideoUrl && videoPlayer) {
-    videoPlayer.src = lastRecordedVideoUrl;
+  // Ambil URL video rekaman
+  let vUrl = null;
+  if (videoBlob) {
+    lastRecordedVideoBlob = videoBlob;
+    lastRecordedVideoUrl = URL.createObjectURL(videoBlob);
+    vUrl = lastRecordedVideoUrl;
+  } else if (slotRecordedVideos[slotNumber]) {
+    lastRecordedVideoBlob = slotRecordedVideos[slotNumber].blob;
+    lastRecordedVideoUrl = slotRecordedVideos[slotNumber].url;
+    vUrl = lastRecordedVideoUrl;
+  } else if (lastRecordedVideoUrl) {
+    vUrl = lastRecordedVideoUrl;
+  }
+
+  if (vUrl && videoPlayer) {
+    videoPlayer.src = vUrl;
     videoPlayer.load();
     if (videoStatus) {
-      videoStatus.textContent = '✅ Rekaman Selesai (Video + Audio HD)';
-      videoStatus.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold';
+      videoStatus.className = 'text-[10px] px-2.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold flex items-center gap-1.5 shadow-sm';
+      videoStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span>Rekaman Selesai & Siap Dibagikan</span>`;
     }
+    // Putar otomatis pratinjau rekaman
+    videoPlayer.play().catch(() => {});
+  } else if (videoStatus) {
+    videoStatus.className = 'text-[10px] px-2.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold flex items-center gap-1.5 shadow-sm';
+    videoStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span>Rekaman Siap</span>`;
   }
 
   document.getElementById('modal-winner-celebration').classList.remove('hidden');
+}
+
+// Buka modal rekaman video dari tombol di kartu slot pemenang
+function openSlotVideoModal(slotIndex) {
+  const winner = appState.currentMonthWinners[slotIndex - 1];
+  if (!winner) {
+    alert(`Slot pemenang ke-#${slotIndex} belum diundi untuk periode ini!`);
+    return;
+  }
+  const slotVideo = slotRecordedVideos[slotIndex];
+  const blob = slotVideo ? slotVideo.blob : lastRecordedVideoBlob;
+  showWinnerCelebration(winner, slotIndex, blob);
 }
 
 // Menghubungkan file rekaman yang telah selesai ke pemutar video pop-up
@@ -1988,25 +2018,17 @@ function attachRecordedVideoToPopup(videoBlob) {
   const videoSection = document.getElementById('celeb-video-section');
   const videoPlayer = document.getElementById('celeb-video-player');
   const videoStatus = document.getElementById('celeb-video-status');
-  const btnStop = document.getElementById('btn-stop-rec-manual');
-
-  if (btnStop) {
-    btnStop.disabled = true;
-    btnStop.classList.add('opacity-50', 'cursor-not-allowed');
-    btnStop.innerHTML = `<i class="fa-solid fa-check text-[9px]"></i><span>Rekaman Disimpan</span>`;
-  }
 
   if (lastRecordedVideoUrl && videoPlayer) {
     videoPlayer.src = lastRecordedVideoUrl;
     videoPlayer.load();
     if (videoSection) videoSection.classList.remove('hidden');
     if (videoStatus) {
-      videoStatus.textContent = '✅ Rekaman Selesai (Video + Audio HD)';
-      videoStatus.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold';
+      videoStatus.className = 'text-[10px] px-2.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold flex items-center gap-1.5 shadow-sm';
+      videoStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span>Rekaman Selesai & Siap Dibagikan</span>`;
     }
   } else if (videoStatus) {
-    videoStatus.textContent = '✅ Rekaman Siap';
-    videoStatus.className = 'text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 font-bold';
+    videoStatus.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i><span>Rekaman Siap</span>`;
   }
 }
 
@@ -2016,14 +2038,9 @@ function closeWinnerCelebration() {
     celebrationAutoStopTimer = null;
   }
 
-  // PEREKAMAN BERHENTI SAAT POPUP PEMENANG BERHENTI/DITUTUP
+  stopCelebrationCanvasAnimation();
   if (isDrawRecordingActive()) {
-    stopCelebrationCanvasAnimation();
-    stopDrawRecording(function(videoBlob) {
-      attachRecordedVideoToPopup(videoBlob);
-    });
-  } else {
-    stopCelebrationCanvasAnimation();
+    stopDrawRecording();
   }
 
   const videoPlayer = document.getElementById('celeb-video-player');
@@ -2035,7 +2052,7 @@ function closeWinnerCelebration() {
 
 // Unduh file video rekaman pengundian
 function downloadDrawVideo() {
-  if (!lastRecordedVideoBlob) {
+  if (!lastRecordedVideoBlob && !lastRecordedVideoUrl) {
     alert("Video rekaman belum siap atau tidak didukung peramban Anda.");
     return;
   }
@@ -2050,33 +2067,68 @@ function downloadDrawVideo() {
   a.remove();
 }
 
-// Bagikan kabar video ke WhatsApp
+// Bagikan file video langsung (Web Share API) jika didukung perangkat
+async function shareVideoFileDirectly() {
+  const winner = activeCelebrationWinner || { name: 'Pemenang', wonSlot: 1 };
+  const cleanName = (winner.name || 'Pemenang').replace(/[^a-zA-Z0-9]/g, '_');
+  const fileName = `Rekaman_Undian_Bulan_${appState.currentPeriod}_Slot_${winner.wonSlot || 1}_${cleanName}.webm`;
+
+  if (lastRecordedVideoBlob && navigator.canShare) {
+    try {
+      const file = new File([lastRecordedVideoBlob], fileName, { type: 'video/webm' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Rekaman Undian Arisan Rumah Bolon - ${winner.name}`,
+          text: `🎥 BUKTI RESMI REKAMAN PENGUNDIAN RODA ARISAN RUMAH BOLON\nPeriode Bulan ke-${appState.currentPeriod} • Pemenang #${winner.wonSlot}: ${winner.name}`
+        });
+        return;
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.warn("Web Share file tidak berhasil, beralih ke download & teks WA:", err);
+      } else {
+        return;
+      }
+    }
+  }
+
+  // Fallback: Unduh video dan buka WhatsApp agar pengguna dapat melampirkan video ke grup
+  downloadDrawVideo();
+  alert("File video (.webm) telah diunduh ke perangkat Anda. WhatsApp akan dibuka agar Anda dapat melampirkan file video rekaman tersebut ke grup semua anggota.");
+  shareDrawVideoWA();
+}
+
+// Bagikan kabar video ke WhatsApp (Grup Anggota)
 function shareDrawVideoWA() {
   if (!activeCelebrationWinner) return;
   const w = activeCelebrationWinner;
   const text =
-`🎥 *BUKTI REKAMAN PENGUNDIAN RESMI ARISAN RUMAH BOLON* 🏛️
-----------------------------------------------------
+`📢 *PENGUMUMAN RESMI PEMENANG ARISAN RUMAH BOLON* 🏛️
+==========================================
 Periode: *Bulan ke-${appState.currentPeriod}*
 Tanggal: ${w.wonDate || formatIndonesianDate(new Date())}
 
 🏆 *SELAMAT KEPADA PEMENANG KE-#${w.wonSlot}:*
 🌟 *${w.name}* 🌟
 
-📋 *Rincian Penerimaan Hadiah:*
+📋 *Rincian Hak Penerimaan Hadiah:*
 • Hak Kotor Arisan : Rp 1.200.000
 • Potongan Kas Rumah Bolon : - Rp 200.000
-💰 *TOTAL DITERIMA BERSIH:* *Rp 1.000.000*
+------------------------------------------
+💰 *DITERIMA BERSIH (NET):* *Rp 1.000.000*
+*(Satu Juta Rupiah)*
+------------------------------------------
 
-🎉 Proses pengundian telah direkam secara transparan dan sah menggunakan Roda Undian Rumah Bolon.
+🎥 *BUKTI REKAMAN PENGUNDIAN RESMI:*
+Proses pemutaran roda undian telah direkam secara transparan, adil, dan akuntabel menggunakan aplikasi resmi Arisan Rumah Bolon.
 
-Pengurus Arisan Rumah Bolon`;
+(File rekaman video undian terlampir sebagai bukti sah pengundian)
 
-  const targetPhone = (w.phone || '').replace(/[^0-9]/g, '');
-  const url = targetPhone.length >= 8 
-    ? `https://api.whatsapp.com/send?phone=${targetPhone}&text=${encodeURIComponent(text)}`
-    : `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+Salam Hangat,
+*Pengurus Arisan Rumah Bolon*`;
 
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
   window.open(url, '_blank');
 }
 
